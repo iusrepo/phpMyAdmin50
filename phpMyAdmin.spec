@@ -4,7 +4,7 @@
 Summary:	Handle the administration of MySQL over the World Wide Web
 Name:		phpMyAdmin
 Version:	4.9.0.1
-Release:	1%{?dist}
+Release:	2%{?dist}
 # MIT (js/jquery/, js/jqplot, js/codemirror/, js/tracekit/)
 # BSD (js/openlayers/)
 # GPLv2+ (the rest)
@@ -244,6 +244,9 @@ sed -e "/'blowfish_secret'/s/MUSTBECHANGEDONINSTALL/$SECRET/" \
 
 
 %changelog
+* Fri Jul 26 2019 Fedora Release Engineering <releng@fedoraproject.org> - 4.9.0.1-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_31_Mass_Rebuild
+
 * Tue Jun  4 2019 Remi Collet <remi@remirepo.net> - 4.9.0.1-1
 - update to 4.9.0.1 (2019-06-04, important security fixes)
 - raise dependency on phpmyadmin/sql-parser version 4.3.2
