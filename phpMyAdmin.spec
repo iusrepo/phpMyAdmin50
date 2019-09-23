@@ -3,8 +3,8 @@
 
 Summary:	Handle the administration of MySQL over the World Wide Web
 Name:		phpMyAdmin
-Version:	4.9.0.1
-Release:	2%{?dist}
+Version:	4.9.1
+Release:	1%{?dist}
 # MIT (js/jquery/, js/jqplot, js/codemirror/, js/tracekit/)
 # BSD (js/openlayers/)
 # GPLv2+ (the rest)
@@ -15,11 +15,13 @@ Source1:	https://files.phpmyadmin.net/%{name}/%{version}/%{name}-%{version}-all-
 Source2:	phpMyAdmin-config.inc.php
 Source3:	phpMyAdmin.htaccess
 Source4:	phpMyAdmin.nginx
+Source5:	https://files.phpmyadmin.net/phpmyadmin.keyring
 
 # Redirect to system certificates
 Patch0:     phpMyAdmin-certs.patch
 
 BuildArch:	noarch
+BuildRequires: gnupg2
 
 Requires:	nginx-filesystem
 Requires:	httpd-filesystem
@@ -41,7 +43,7 @@ Suggests:	httpd
 #        "phpseclib/phpseclib": "^2.0",
 #        "google/recaptcha": "^1.1",
 #        "psr/container": "^1.0",
-#        "twig/twig": "^1.34",
+#        "twig/twig": "^1.34 || ^2.0",
 #        "twig/extensions": "~1.5.1",
 #        "symfony/expression-language": "^3.2 || ^2.8",
 #        "symfony/polyfill-mbstring": "^1.3"
@@ -64,7 +66,7 @@ Requires:  (php-composer(phpmyadmin/shapefile)        >= 2.0   with php-composer
 Requires:  (php-composer(phpseclib/phpseclib)         >= 2.0.9 with php-composer(phpseclib/phpseclib)         < 3)
 Requires:  (php-composer(google/recaptcha)            >= 1.1   with php-composer(google/recaptcha)            < 2)
 Requires:  (php-composer(psr/container)               >= 1.0   with php-composer(psr/container)               < 2)
-Requires:  (php-composer(twig/twig)                   >= 1.34  with php-composer(twig/twig)                   < 2)
+Requires:  (php-composer(twig/twig)                   >= 1.34  with php-composer(twig/twig)                   < 3)
 Requires:  (php-composer(twig/extensions)             >= 1.5.1 with php-composer(twig/extensions)             < 2)
 Requires:  (php-composer(symfony/expression-language) >= 2.8   with php-composer(symfony/expression-language) < 4)
 Requires:  (php-composer(symfony/polyfill-mbstring)   >= 1.3   with php-composer(symfony/polyfill-mbstring)   < 2)
@@ -140,6 +142,8 @@ transforming stored data into any format using a set of predefined functions,
 like displaying BLOB-data as image or download-link and much more...
 
 %prep
+%{?gpgverify:%{gpgverify} --keyring='%{SOURCE5}' --signature='%{SOURCE1}' --data='%{SOURCE0}'}
+
 %setup -q -n %{pkgname}-%{version}-all-languages
 %patch0 -p1
 
@@ -171,7 +175,10 @@ require_once '%{_datadir}/php/Fedora/Autoloader/autoload.php';
     '%{_datadir}/php/phpseclib/autoload.php',
     '%{_datadir}/php/ReCaptcha/autoload.php',
     '%{_datadir}/php/Psr/Container/autoload.php',
-    '%{_datadir}/php/Twig/autoload.php',
+    [
+        '%{_datadir}/php/Twig2/autoload.php',
+        '%{_datadir}/php/Twig/autoload.php',
+    ],
     '%{_datadir}/php/Twig/Extensions/autoload.php',
     [
         '%{_datadir}/php/Symfony3/Component/ExpressionLanguage/autoload.php',
@@ -244,6 +251,11 @@ sed -e "/'blowfish_secret'/s/MUSTBECHANGEDONINSTALL/$SECRET/" \
 
 
 %changelog
+* Sat Sep 21 2019 Remi Collet <remi@remirepo.net> - 4.9.1-1
+- update to 4.9.1 (2019-09-21, bug fix release)
+- add tarball signature check
+- allow twig version 2
+
 * Fri Jul 26 2019 Fedora Release Engineering <releng@fedoraproject.org> - 4.9.0.1-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_31_Mass_Rebuild
 
