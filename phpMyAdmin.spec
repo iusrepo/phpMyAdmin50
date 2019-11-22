@@ -3,7 +3,7 @@
 
 Summary:	Handle the administration of MySQL over the World Wide Web
 Name:		phpMyAdmin
-Version:	4.9.1
+Version:	4.9.2
 Release:	1%{?dist}
 # MIT (js/jquery/, js/jqplot, js/codemirror/, js/tracekit/)
 # BSD (js/openlayers/)
@@ -251,6 +251,9 @@ sed -e "/'blowfish_secret'/s/MUSTBECHANGEDONINSTALL/$SECRET/" \
 
 
 %changelog
+* Fri Nov 22 2019 Remi Collet <remi@remirepo.net> - 4.9.2-1
+- update to 4.9.2 (2019-11-22, bugfix and security release)
+
 * Sat Sep 21 2019 Remi Collet <remi@remirepo.net> - 4.9.1-1
 - update to 4.9.1 (2019-09-21, bug fix release)
 - add tarball signature check
