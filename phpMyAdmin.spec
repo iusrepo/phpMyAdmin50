@@ -4,7 +4,7 @@
 Summary:	Handle the administration of MySQL over the World Wide Web
 Name:		phpMyAdmin
 Version:	4.9.2
-Release:	1%{?dist}
+Release:	2%{?dist}
 # MIT (js/jquery/, js/jqplot, js/codemirror/, js/tracekit/)
 # BSD (js/openlayers/)
 # GPLv2+ (the rest)
@@ -99,11 +99,11 @@ Recommends: php-composer(bacon/bacon-qr-code)    >= 1.0
 Recommends: php-composer(samyoul/u2f-php-server) >= 1.1
 Recommends: php-tcpdf-dejavu-sans-fonts          >= 6.2
 # From phpcompatinfo reports for 4.8.0
+#   notice: recode is optional (iconv or mbstring are preferred / used first)
 Requires:  php-date
 Requires:  php-filter
 Requires:  php-iconv
 Requires:  php-libxml
-Requires:  php-recode
 Requires:  php-session
 Requires:  php-simplexml
 Requires:  php-spl
@@ -251,6 +251,9 @@ sed -e "/'blowfish_secret'/s/MUSTBECHANGEDONINSTALL/$SECRET/" \
 
 
 %changelog
+* Mon Dec  2 2019 Remi Collet <remi@remirepo.net> - 4.9.2-2
+- drop dependency on php-recode (mbstring preferred)
+
 * Fri Nov 22 2019 Remi Collet <remi@remirepo.net> - 4.9.2-1
 - update to 4.9.2 (2019-11-22, bugfix and security release)
 
