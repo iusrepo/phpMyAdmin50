@@ -1,75 +1,92 @@
-%{!?_pkgdocdir: %global _pkgdocdir %{_docdir}/%{name}-%{version}}
-%global pkgname	phpMyAdmin
+# Fedora spec file for phpMyAdmin
+#
+# License: MIT
+# http://opensource.org/licenses/MIT
+#
+# Please, preserve the changelog entries
+#
+%{!?_pkgdocdir: %global _pkgdocdir %{_datadir}/doc/%{name}-%{version}}
+# nginx 1.6 with nginx-filesystem
+%global with_nginx     1
+# httpd 2.4 with httpd-filesystem
+%global with_httpd     1
 
-Summary:	Handle the administration of MySQL over the World Wide Web
-Name:		phpMyAdmin
-Version:	4.9.2
-Release:	2%{?dist}
+%global upstream_version 5.0.0
+#global upstream_prever  rc1
+
+Name: phpMyAdmin
+Version: %{upstream_version}%{?upstream_prever:~%{upstream_prever}}
+Release: 1%{?dist}
+Summary: A web interface for MySQL and MariaDB
+
 # MIT (js/jquery/, js/jqplot, js/codemirror/, js/tracekit/)
 # BSD (js/openlayers/)
 # GPLv2+ (the rest)
-License:	GPLv2+ and MIT and BSD
-URL:		https://www.phpmyadmin.net/
-Source0:	https://files.phpmyadmin.net/%{name}/%{version}/%{name}-%{version}-all-languages.tar.xz
-Source1:	https://files.phpmyadmin.net/%{name}/%{version}/%{name}-%{version}-all-languages.tar.xz.asc
-Source2:	phpMyAdmin-config.inc.php
-Source3:	phpMyAdmin.htaccess
-Source4:	phpMyAdmin.nginx
-Source5:	https://files.phpmyadmin.net/phpmyadmin.keyring
+License: GPLv2+ and MIT and BSD
+URL: https://www.phpmyadmin.net/
+Source0: https://files.phpmyadmin.net/%{name}/%{upstream_version}%{?upstream_prever:-%upstream_prever}/%{name}-%{upstream_version}%{?upstream_prever:-%upstream_prever}-all-languages.tar.xz
+Source1: https://files.phpmyadmin.net/%{name}/%{upstream_version}%{?upstream_prever:-%upstream_prever}/%{name}-%{upstream_version}%{?upstream_prever:-%upstream_prever}-all-languages.tar.xz.asc
+Source2: phpMyAdmin.htaccess
+Source3: phpMyAdmin.nginx
+Source4: https://files.phpmyadmin.net/phpmyadmin.keyring
 
 # Redirect to system certificates
-Patch0:     phpMyAdmin-certs.patch
+Patch0:  phpMyAdmin-certs.patch
 
-BuildArch:	noarch
+BuildArch: noarch
 BuildRequires: gnupg2
 
-Requires:	nginx-filesystem
-Requires:	httpd-filesystem
-Requires:	php(httpd)
-Suggests:	httpd
-
+Requires(post): coreutils sed
+Requires:  webserver
+%if %{with_nginx}
+Requires:  nginx-filesystem
+%endif
+%if %{with_httpd}
+Requires:  httpd-filesystem
+Requires:  php(httpd)
+Suggests:  httpd
+%endif
 # From composer.json, "require": {
-#        "php": ">=5.5.0",
-#        "ext-mysqli": "*",
-#        "ext-xml": "*",
-#        "ext-pcre": "*",
-#        "ext-json": "*",
-#        "ext-ctype": "*",
+#        "php": "^7.1.3",
 #        "ext-hash": "*",
-#        "phpmyadmin/sql-parser": "^4.3.2",
+#        "ext-iconv": "*",
+#        "ext-json": "*",
+#        "ext-mysqli": "*",
+#        "ext-pcre": "*",
+#        "ext-xml": "*",
+#        "google/recaptcha": "^1.1",
 #        "phpmyadmin/motranslator": "^4.0",
 #        "phpmyadmin/shapefile": "^2.0",
-#        "tecnickcom/tcpdf": "^6.2",
+#        "phpmyadmin/sql-parser": "^5.0",
 #        "phpseclib/phpseclib": "^2.0",
-#        "google/recaptcha": "^1.1",
-#        "psr/container": "^1.0",
-#        "twig/twig": "^1.34 || ^2.0",
+#        "symfony/config": "^4.2.8",
+#        "symfony/dependency-injection": "^4.2.8",
+#        "symfony/expression-language": "^4.2",
+#        "symfony/polyfill-ctype": "^1.8",
+#        "symfony/polyfill-mbstring": "^1.3",
+#        "symfony/yaml": "^4.2.8",
 #        "twig/extensions": "~1.5.1",
-#        "symfony/expression-language": "^3.2 || ^2.8",
-#        "symfony/polyfill-mbstring": "^1.3"
-#    "conflict": {
-#        "phpseclib/phpseclib": "2.0.8",
-#        "tecnickcom/tcpdf": "<6.2",
-#        "pragmarx/google2fa": "<3.0.1",
-#        "bacon/bacon-qr-code": "<1.0",
-#        "samyoul/u2f-php-server": "<1.1"
-Requires:  php(language) >= 5.5
-Requires:  php-mysqli
-Requires:  php-xml
-Requires:  php-pcre
-Requires:  php-json
-Requires:  php-ctype
+#        "twig/twig": "^2.4",
+#        "williamdes/mariadb-mysql-kbs": "^1.2"
+Requires:  php(language) >= 7.1.3
 Requires:  php-hash
-Requires:  (php-composer(phpmyadmin/sql-parser)       >= 4.3.2 with php-composer(phpmyadmin/sql-parser)       < 5)
-Requires:  (php-composer(phpmyadmin/motranslator)     >= 4.0   with php-composer(phpmyadmin/motranslator)     < 5)
-Requires:  (php-composer(phpmyadmin/shapefile)        >= 2.0   with php-composer(phpmyadmin/shapefile)        < 3)
-Requires:  (php-composer(phpseclib/phpseclib)         >= 2.0.9 with php-composer(phpseclib/phpseclib)         < 3)
-Requires:  (php-composer(google/recaptcha)            >= 1.1   with php-composer(google/recaptcha)            < 2)
-Requires:  (php-composer(psr/container)               >= 1.0   with php-composer(psr/container)               < 2)
-Requires:  (php-composer(twig/twig)                   >= 1.34  with php-composer(twig/twig)                   < 3)
-Requires:  (php-composer(twig/extensions)             >= 1.5.1 with php-composer(twig/extensions)             < 2)
-Requires:  (php-composer(symfony/expression-language) >= 2.8   with php-composer(symfony/expression-language) < 4)
-Requires:  (php-composer(symfony/polyfill-mbstring)   >= 1.3   with php-composer(symfony/polyfill-mbstring)   < 2)
+Requires:  php-iconv
+Requires:  php-json
+Requires:  php-mysqli
+Requires:  php-pcre
+Requires:  php-xml
+Requires:  (php-composer(google/recaptcha)             >= 1.1   with php-composer(google/recaptcha)             < 2)
+Requires:  (php-composer(phpmyadmin/motranslator)      >= 4.0   with php-composer(phpmyadmin/motranslator)      < 5)
+Requires:  (php-composer(phpmyadmin/shapefile)         >= 2.0   with php-composer(phpmyadmin/shapefile)         < 3)
+Requires:  (php-composer(phpmyadmin/sql-parser)        >= 5.0   with php-composer(phpmyadmin/sql-parser)        < 6)
+Requires:  (php-composer(phpseclib/phpseclib)          >= 2.0.9 with php-composer(phpseclib/phpseclib)          < 3)
+Requires:  (php-composer(symfony/config)               >= 4.2.8 with php-composer(symfony/config)               < 5)
+Requires:  (php-composer(symfony/dependency-injection) >= 4.2.8 with php-composer(symfony/dependency-injection) < 5)
+Requires:  (php-composer(symfony/expression-language)  >= 4.2.8 with php-composer(symfony/expression-language)  < 5)
+Requires:  (php-composer(symfony/polyfill-mbstring)    >= 1.8   with php-composer(symfony/polyfill-mbstring)    < 2)
+Requires:  (php-composer(symfony/yaml)                 >= 4.2.8 with php-composer(symfony/yaml)                 < 5)
+Requires:  (php-composer(twig/twig)                    >= 2.4   with php-composer(twig/twig)                    < 3)
+Requires:  (php-composer(twig/extensions)              >= 1.5.1 with php-composer(twig/extensions)              < 2)
 # Autoloader
 Requires:  php-composer(fedora/autoloader)
 # From composer.json, "suggest": {
@@ -82,9 +99,14 @@ Requires:  php-composer(fedora/autoloader)
 #        "ext-gd2": "For image transformations",
 #        "ext-mbstring": "For best performance",
 #        "tecnickcom/tcpdf": "For PDF support",
-#        "pragmarx/google2fa": "For 2FA authentication",
-#        "bacon/bacon-qr-code": "For 2FA authentication",
+#        "pragmarx/google2fa-qrcode": "For 2FA authentication",
 #        "samyoul/u2f-php-server": "For FIDO U2F authentication"
+#    "conflict": {
+#        "phpseclib/phpseclib": "2.0.8",
+#        "tecnickcom/tcpdf": "<6.2",
+#        "pragmarx/google2fa-qrcode": "<1.0.1",
+#        "samyoul/u2f-php-server": "<1.1"
+Requires:  php-ctype
 Requires:  php-openssl
 Requires:  php-curl
 Requires:  php-zlib
@@ -93,16 +115,14 @@ Requires:  php-zip
 Requires:  php-gd
 Requires:  php-mbstring
 Recommends: php-opcache
-Recommends: php-composer(tecnickcom/tcpdf)       >= 6.2
-Recommends: php-composer(pragmarx/google2fa)     >= 3.0.1
-Recommends: php-composer(bacon/bacon-qr-code)    >= 1.0
-Recommends: php-composer(samyoul/u2f-php-server) >= 1.1
-Recommends: php-tcpdf-dejavu-sans-fonts          >= 6.2
-# From phpcompatinfo reports for 4.8.0
+Recommends: php-composer(tecnickcom/tcpdf)          >= 6.3
+Recommends: php-composer(pragmarx/google2fa-qrcode) >= 1.0.1
+Recommends: php-composer(samyoul/u2f-php-server)    >= 1.1
+Recommends: php-tcpdf-dejavu-sans-fonts             >= 6.2
+# From phpcompatinfo reports for 5.0.0
 #   notice: recode is optional (iconv or mbstring are preferred / used first)
 Requires:  php-date
 Requires:  php-filter
-Requires:  php-iconv
 Requires:  php-libxml
 Requires:  php-session
 Requires:  php-simplexml
@@ -118,46 +138,47 @@ Provides:  bundled(js-jquery) = 3.2.1
 Provides:  bundled(js-openlayers)
 Provides:  bundled(js-tracekit)
 
-Provides:  phpmyadmin = %{version}-%{release}
+Provides:  php-composer(phpmyadmin/phpmyadmin) = %{version}
+# Update from other 3rd party
+Obsoletes: phpMyAdmin49 <= %{version}
+Obsoletes: phpmyadmin   <  %{version}
+# Allow lowercase in install command
+Provides:  phpmyadmin   =  %{version}-%{release}
 
 
 %description
 phpMyAdmin is a tool written in PHP intended to handle the administration of
-MySQL over the World Wide Web. Most frequently used operations are supported
-by the user interface (managing databases, tables, fields, relations, indexes,
-users, permissions), while you still have the ability to directly execute any
-SQL statement.
+MySQL over the Web. Currently it can create and drop databases,
+create/drop/alter tables, delete/edit/add fields, execute any SQL statement,
+manage keys on fields, manage privileges,export data into various formats and
+is available in 50 languages
 
-Features include an intuitive web interface, support for most MySQL features
-(browse and drop databases, tables, views, fields and indexes, create, copy,
-drop, rename and alter databases, tables, fields and indexes, maintenance
-server, databases and tables, with proposals on server configuration, execute,
-edit and bookmark any SQL-statement, even batch-queries, manage MySQL users
-and privileges, manage stored procedures and triggers), import data from CSV
-and SQL, export data to various formats: CSV, SQL, XML, PDF, OpenDocument Text
-and Spreadsheet, Word, Excel, LATEX and others, administering multiple servers,
-creating PDF graphics of your database layout, creating complex queries using
-Query-by-example (QBE), searching globally in a database or a subset of it,
-transforming stored data into any format using a set of predefined functions,
-like displaying BLOB-data as image or download-link and much more...
 
 %prep
-%{?gpgverify:%{gpgverify} --keyring='%{SOURCE5}' --signature='%{SOURCE1}' --data='%{SOURCE0}'}
+%{?gpgverify:%{gpgverify} --keyring='%{SOURCE4}' --signature='%{SOURCE1}' --data='%{SOURCE0}'}
 
-%setup -q -n %{pkgname}-%{version}-all-languages
+%setup -qn phpMyAdmin-%{upstream_version}%{?upstream_prever:-%upstream_prever}-all-languages
 %patch0 -p1
 
+# Minimal configuration file
+sed -e "/'blowfish_secret'/s@''@'MUSTBECHANGEDONINSTALL'@"  \
+    -e "/'UploadDir'/s@''@'%{_localstatedir}/lib/%{name}/upload'@"  \
+    -e "/'SaveDir'/s@''@'%{_localstatedir}/lib/%{name}/save'@" \
+    config.sample.inc.php >CONFIG
+
 # Setup vendor config file
-sed -e "/'CHANGELOG_FILE'/s@./ChangeLog@%{_pkgdocdir}/ChangeLog@" \
-    -e "/'LICENSE_FILE'/s@./LICENSE@%{_pkgdocdir}/LICENSE@" \
-    -e "/'CONFIG_DIR'/s@''@'%{_sysconfdir}/%{name}/'@" \
-    -e "/'SETUP_CONFIG_FILE'/s@./config/config.inc.php@%{_localstatedir}/lib/%{pkgname}/config/config.inc.php@" \
+sed -e "/'CHANGELOG_FILE'/s@ROOT_PATH@'%{_pkgdocdir}/'@" \
+    -e "/'LICENSE_FILE'/s@ROOT_PATH@'%{_pkgdocdir}/'@" \
+    -e "/'CONFIG_DIR'/s@ROOT_PATH@'%{_sysconfdir}/%{name}/'@" \
 %if 0%{?_licensedir:1}
     -e '/LICENSE_FILE/s:%_defaultdocdir:%_defaultlicensedir:' \
 %endif
     -e '/AUTOLOAD_FILE/s@./vendor@%{_datadir}/%{name}/vendor@' \
-    -e '/TEMP_DIR/s@./tmp@%{_localstatedir}/lib/%{name}/temp@' \
+    -e "/TEMP_DIR/s@ROOT.*tmp/'@'%{_localstatedir}/lib/%{name}/temp'@" \
     -i libraries/vendor_config.php
+
+# For debug
+grep '^define' libraries/vendor_config.php
 
 # Generate autoloader
 rm -rf vendor/*
@@ -167,49 +188,51 @@ cat << 'EOF' | tee vendor/autoload.php
 
 require_once '%{_datadir}/php/Fedora/Autoloader/autoload.php';
 \Fedora\Autoloader\Autoload::addPsr4('PhpMyAdmin\\',        dirname(__DIR__) . '/libraries/classes');
-\Fedora\Autoloader\Autoload::addPsr4('PhpMyAdmin\\Setup\\', dirname(__DIR__) . '/setup/lib');
 \Fedora\Autoloader\Dependencies::required([
-    '%{_datadir}/php/PhpMyAdmin/SqlParser/autoload.php',
+    '%{_datadir}/php/PhpMyAdmin/SqlParser5/autoload.php',
     '%{_datadir}/php/PhpMyAdmin/MoTranslator/autoload.php',
     '%{_datadir}/php/PhpMyAdmin/ShapeFile/autoload.php',
     '%{_datadir}/php/phpseclib/autoload.php',
     '%{_datadir}/php/ReCaptcha/autoload.php',
-    '%{_datadir}/php/Psr/Container/autoload.php',
-    [
-        '%{_datadir}/php/Twig2/autoload.php',
-        '%{_datadir}/php/Twig/autoload.php',
-    ],
+    '%{_datadir}/php/Twig2/autoload.php',
     '%{_datadir}/php/Twig/Extensions/autoload.php',
-    [
-        '%{_datadir}/php/Symfony3/Component/ExpressionLanguage/autoload.php',
-        '%{_datadir}/php/Symfony/Component/ExpressionLanguage/autoload.php',
-    ],
+    '%{_datadir}/php/Symfony4/Component/Config/autoload.php',
+    '%{_datadir}/php/Symfony4/Component/DependencyInjection/autoload.php',
+    '%{_datadir}/php/Symfony4/Component/ExpressionLanguage/autoload.php',
+    '%{_datadir}/php/Symfony4/Component/Yaml/autoload.php',
     '%{_datadir}/php/Symfony/Polyfill/autoload.php',
 ]);
 \Fedora\Autoloader\Dependencies::optional([
     '%{_datadir}/php/tcpdf/autoload.php',
-    '%{_datadir}/php/PragmaRX/Google2FA/autoload.php',
-    '%{_datadir}/php/BaconQrCode/autoload.php',
+    '%{_datadir}/php/Google2FAQRCode/Google2FA/autoload.php',
     '%{_datadir}/php/Samyoul/U2F/U2FServer/autoload.php',
 ]);
 EOF
 
 
 %build
+# Nothing to do
 
 
 %install
-mkdir -p $RPM_BUILD_ROOT%{_datadir}/%{pkgname}
-mkdir -p $RPM_BUILD_ROOT%{_localstatedir}/lib/%{pkgname}/{upload,save,config,temp}/
-cp -ad * $RPM_BUILD_ROOT%{_datadir}/%{pkgname}/
-install -Dpm 0644 %{SOURCE3} $RPM_BUILD_ROOT%{_sysconfdir}/httpd/conf.d/%{pkgname}.conf
-install -Dpm 0640 %{SOURCE2} $RPM_BUILD_ROOT%{_sysconfdir}/%{pkgname}/config.inc.php
-install -Dpm 0644 %{SOURCE4} $RPM_BUILD_ROOT%{_sysconfdir}/nginx/default.d/%{pkgname}.conf
+mkdir -p %{buildroot}/%{_datadir}/%{name}
+cp -ad ./* %{buildroot}/%{_datadir}/%{name}
+install -Dpm 0640 CONFIG %{buildroot}/%{_sysconfdir}/%{name}/config.inc.php
+# Apache
+install -Dpm 0644 %{SOURCE2} %{buildroot}/%{_sysconfdir}/httpd/conf.d/phpMyAdmin.conf
+# Nginx
+%if %{with_nginx}
+install -Dpm 0644 %{SOURCE3} %{buildroot}/%{_sysconfdir}/nginx/default.d/phpMyAdmin.conf
+%endif
 
-rm -f $RPM_BUILD_ROOT%{_datadir}/%{pkgname}/{[CDLR]*,*.txt,config.sample.inc.php}
-rm -rf $RPM_BUILD_ROOT%{_datadir}/%{pkgname}/{doc,examples}/
-rm -f doc/html/.buildinfo
-rm $RPM_BUILD_ROOT/%{_datadir}/%{name}/composer.*
+rm -f %{buildroot}/%{_datadir}/%{name}/config.sample.inc.php
+rm -f %{buildroot}/%{_datadir}/%{name}/*txt
+rm -f %{buildroot}/%{_datadir}/%{name}/[CDLR]*
+rm -f %{buildroot}/%{_datadir}/%{name}/libraries/.htaccess
+rm -f %{buildroot}/%{_datadir}/%{name}/setup/lib/.htaccess
+rm -f %{buildroot}/%{_datadir}/%{name}/setup/frames/.htaccess
+rm -rf %{buildroot}/%{_datadir}/%{name}/contrib
+rm     %{buildroot}/%{_datadir}/%{name}/composer.*
 
 # JS libraries sources
 #rm -r %{buildroot}%{_datadir}/%{name}/js/jquery/src
@@ -218,13 +241,23 @@ rm $RPM_BUILD_ROOT/%{_datadir}/%{name}/composer.*
 # Bundled certificates
 rm -r %{buildroot}%{_datadir}/%{name}/libraries/certs
 
-mkdir -p $RPM_BUILD_ROOT%{_datadir}/%{pkgname}/doc/
-ln -s ../../../..%{_pkgdocdir}/html/ $RPM_BUILD_ROOT%{_datadir}/%{pkgname}/doc/html
-mv -f config.sample.inc.php examples/
+# documentation
+rm -rf    %{buildroot}%{_datadir}/%{name}/examples/
+rm -rf    %{buildroot}%{_datadir}/%{name}/doc/
+mkdir -p  %{buildroot}%{_datadir}/%{name}/doc/
+ln -s %{_pkgdocdir}/html  %{buildroot}%{_datadir}/%{name}/doc/html
 
-mv -f $RPM_BUILD_ROOT%{_datadir}/%{pkgname}/js/vendor/jquery/MIT-LICENSE.txt LICENSE-jquery
-mv -f $RPM_BUILD_ROOT%{_datadir}/%{pkgname}/js/vendor/codemirror/LICENSE LICENSE-codemirror
+mkdir -p %{buildroot}/%{_localstatedir}/lib/%{name}/{upload,save,config,temp}
 
+mv -f %{buildroot}%{_datadir}/%{name}/js/vendor/jquery/MIT-LICENSE.txt LICENSE-jquery
+mv -f %{buildroot}%{_datadir}/%{name}/js/vendor/codemirror/LICENSE LICENSE-codemirror
+
+
+%pretrans
+# allow dir to link upgrade
+if  [ -d %{_datadir}/%{name}/doc/html ]; then
+  rm -rf %{_datadir}/%{name}/doc/html
+fi
 
 %post
 # generate a 32 chars secret key for this install
@@ -236,21 +269,35 @@ sed -e "/'blowfish_secret'/s/MUSTBECHANGEDONINSTALL/$SECRET/" \
 %files
 %{!?_licensedir:%global license %%doc}
 %license LICENSE*
-%doc ChangeLog README DCO doc/html/ examples/
+%doc ChangeLog README CONTRIBUTING.md DCO config.sample.inc.php
+%doc doc/html/
+%doc examples/
 %doc composer.json
-%{_datadir}/%{pkgname}/
-%dir %attr(0750,root,apache) %{_sysconfdir}/%{pkgname}/
-%config(noreplace) %attr(0640,root,apache) %{_sysconfdir}/%{pkgname}/config.inc.php
-%config(noreplace) %{_sysconfdir}/httpd/conf.d/%{pkgname}.conf
-%config(noreplace) %{_sysconfdir}/nginx/default.d/%{pkgname}.conf
-%dir %{_localstatedir}/lib/%{pkgname}/
-%dir %attr(0750,apache,apache) %{_localstatedir}/lib/%{pkgname}/upload/
-%dir %attr(0750,apache,apache) %{_localstatedir}/lib/%{pkgname}/save/
-%dir %attr(0750,apache,apache) %{_localstatedir}/lib/%{pkgname}/config/
-%dir %attr(0750,apache,apache) %{_localstatedir}/lib/%{pkgname}/temp/
+%{_datadir}/%{name}
+%attr(0750,root,apache) %dir %{_sysconfdir}/%{name}
+%config(noreplace) %attr(0640,root,apache) %{_sysconfdir}/%{name}/config.inc.php
+%config(noreplace) %{_sysconfdir}/httpd/conf.d/%{name}.conf
+%if %{with_nginx}
+%config(noreplace) %{_sysconfdir}/nginx/default.d/%{name}.conf
+%endif
+%dir %{_localstatedir}/lib/%{name}/
+%dir %attr(0750,apache,apache) %{_localstatedir}/lib/%{name}/upload
+%dir %attr(0750,apache,apache) %{_localstatedir}/lib/%{name}/save
+%dir %attr(0750,apache,apache) %{_localstatedir}/lib/%{name}/config
+%dir %attr(0750,apache,apache) %{_localstatedir}/lib/%{name}/temp
 
 
 %changelog
+* Fri Dec 27 2019 Remi Collet <remi@remirepo.net> 5.0.0-1
+- update to 5.0.0 (2019-12-26, new features release)
+- raise dependency on PHP 7.1.3
+- raise dependency on phpmyadmin/sql-parser 5.0
+- raise dependency on twig 2.1
+- add dependency on pragmarx/google2fa-qrcode
+- drop dependency on pragmarx/google2fa and bacon/bacon-qr-code
+- drop dependency on psr/container
+- sync spec file with remirepo one
+
 * Mon Dec  2 2019 Remi Collet <remi@remirepo.net> - 4.9.2-2
 - drop dependency on php-recode (mbstring preferred)
 

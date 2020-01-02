@@ -1,11 +1,11 @@
 diff -up ./libraries/classes/Utils/HttpRequest.php.rpm ./libraries/classes/Utils/HttpRequest.php
---- ./libraries/classes/Utils/HttpRequest.php.rpm	2018-03-01 15:05:29.388126314 +0100
-+++ ./libraries/classes/Utils/HttpRequest.php	2018-03-01 15:06:51.922563502 +0100
-@@ -139,12 +139,12 @@ class HttpRequest
+--- ./libraries/classes/Utils/HttpRequest.php.rpm	2019-09-12 15:57:49.955739598 +0200
++++ ./libraries/classes/Utils/HttpRequest.php	2019-09-12 15:58:00.262698588 +0200
+@@ -141,12 +141,12 @@ class HttpRequest
           *
           * See https://letsencrypt.org/certificates/
           */
--        $certsDir = dirname(__file__) . '/../../certs/';
+-        $certsDir = ROOT_PATH . 'libraries/certs/';
 +        $certsDir = '/etc/pki/tls/';
          /* See code below for logic */
          if ($ssl == CURLOPT_CAPATH) {
