@@ -16,7 +16,7 @@
 
 Name: phpMyAdmin
 Version: %{upstream_version}%{?upstream_prever:~%{upstream_prever}}
-Release: 1%{?dist}.1
+Release: 1%{?dist}.2
 Summary: A web interface for MySQL and MariaDB
 
 # MIT (js/jquery/, js/jqplot, js/codemirror/, js/tracekit/)
