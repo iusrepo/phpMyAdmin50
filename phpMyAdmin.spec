@@ -11,12 +11,12 @@
 # httpd 2.4 with httpd-filesystem
 %global with_httpd     1
 
-%global upstream_version 5.0.0
+%global upstream_version 5.0.1
 #global upstream_prever  rc1
 
 Name: phpMyAdmin
 Version: %{upstream_version}%{?upstream_prever:~%{upstream_prever}}
-Release: 1%{?dist}.2
+Release: 1%{?dist}
 Summary: A web interface for MySQL and MariaDB
 
 # MIT (js/jquery/, js/jqplot, js/codemirror/, js/tracekit/)
@@ -119,7 +119,7 @@ Recommends: php-composer(tecnickcom/tcpdf)          >= 6.3
 Recommends: php-composer(pragmarx/google2fa-qrcode) >= 1.0.1
 Recommends: php-composer(samyoul/u2f-php-server)    >= 1.1
 Recommends: php-tcpdf-dejavu-sans-fonts             >= 6.2
-# From phpcompatinfo reports for 5.0.0
+# From phpcompatinfo reports for 4.8.0
 #   notice: recode is optional (iconv or mbstring are preferred / used first)
 Requires:  php-date
 Requires:  php-filter
@@ -139,9 +139,6 @@ Provides:  bundled(js-openlayers)
 Provides:  bundled(js-tracekit)
 
 Provides:  php-composer(phpmyadmin/phpmyadmin) = %{version}
-# Update from other 3rd party
-Obsoletes: phpMyAdmin49 <= %{version}
-Obsoletes: phpmyadmin   <  %{version}
 # Allow lowercase in install command
 Provides:  phpmyadmin   =  %{version}-%{release}
 
@@ -288,6 +285,9 @@ sed -e "/'blowfish_secret'/s/MUSTBECHANGEDONINSTALL/$SECRET/" \
 
 
 %changelog
+* Wed Jan  8 2020 Remi Collet <remi@remirepo.net> 5.0.1-1
+- update to 5.0.1 (2020-01-08, security release)
+
 * Fri Dec 27 2019 Remi Collet <remi@remirepo.net> 5.0.0-1
 - update to 5.0.0 (2019-12-26, new features release)
 - raise dependency on PHP 7.1.3
