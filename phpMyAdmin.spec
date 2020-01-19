@@ -16,7 +16,7 @@
 
 Name: phpMyAdmin
 Version: %{upstream_version}%{?upstream_prever:~%{upstream_prever}}
-Release: 1%{?dist}
+Release: 2%{?dist}
 Summary: A web interface for MySQL and MariaDB
 
 # MIT (js/jquery/, js/jqplot, js/codemirror/, js/tracekit/)
@@ -87,6 +87,7 @@ Requires:  (php-composer(symfony/polyfill-mbstring)    >= 1.8   with php-compose
 Requires:  (php-composer(symfony/yaml)                 >= 4.2.8 with php-composer(symfony/yaml)                 < 5)
 Requires:  (php-composer(twig/twig)                    >= 2.4   with php-composer(twig/twig)                    < 3)
 Requires:  (php-composer(twig/extensions)              >= 1.5.1 with php-composer(twig/extensions)              < 2)
+Requires:  (php-composer(williamdes/mariadb-mysql-kbs) >= 1.2   with php-composer(williamdes/mariadb-mysql-kbs) < 2)
 # Autoloader
 Requires:  php-composer(fedora/autoloader)
 # From composer.json, "suggest": {
@@ -198,6 +199,7 @@ require_once '%{_datadir}/php/Fedora/Autoloader/autoload.php';
     '%{_datadir}/php/Symfony4/Component/ExpressionLanguage/autoload.php',
     '%{_datadir}/php/Symfony4/Component/Yaml/autoload.php',
     '%{_datadir}/php/Symfony/Polyfill/autoload.php',
+    '%{_datadir}/php/Williamdes/MariaDBMySQLKBS/autoload.php',
 ]);
 \Fedora\Autoloader\Dependencies::optional([
     '%{_datadir}/php/tcpdf/autoload.php',
@@ -285,6 +287,9 @@ sed -e "/'blowfish_secret'/s/MUSTBECHANGEDONINSTALL/$SECRET/" \
 
 
 %changelog
+* Sun Jan 19 2020 Remi Collet <remi@remirepo.net> 5.0.1-2
+- add missing depependency on williamdes/mariadb-mysql-kbs
+
 * Wed Jan  8 2020 Remi Collet <remi@remirepo.net> 5.0.1-1
 - update to 5.0.1 (2020-01-08, security release)
 
