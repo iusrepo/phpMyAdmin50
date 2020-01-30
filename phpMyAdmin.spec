@@ -16,7 +16,7 @@
 
 Name: phpMyAdmin
 Version: %{upstream_version}%{?upstream_prever:~%{upstream_prever}}
-Release: 2%{?dist}
+Release: 3%{?dist}
 Summary: A web interface for MySQL and MariaDB
 
 # MIT (js/jquery/, js/jqplot, js/codemirror/, js/tracekit/)
@@ -287,6 +287,9 @@ sed -e "/'blowfish_secret'/s/MUSTBECHANGEDONINSTALL/$SECRET/" \
 
 
 %changelog
+* Thu Jan 30 2020 Fedora Release Engineering <releng@fedoraproject.org> - 5.0.1-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_32_Mass_Rebuild
+
 * Sun Jan 19 2020 Remi Collet <remi@remirepo.net> 5.0.1-2
 - add missing depependency on williamdes/mariadb-mysql-kbs
 
