@@ -16,7 +16,7 @@
 
 Name: phpMyAdmin
 Version: %{upstream_version}%{?upstream_prever:~%{upstream_prever}}
-Release: 1%{?dist}
+Release: 2%{?dist}
 Summary: A web interface for MySQL and MariaDB
 
 # MIT (js/jquery/, js/jqplot, js/codemirror/, js/tracekit/)
@@ -287,6 +287,9 @@ sed -e "/'blowfish_secret'/s/MUSTBECHANGEDONINSTALL/$SECRET/" \
 
 
 %changelog
+* Tue Mar 24 2020 Remi Collet <remi@remirepo.net> 5.0.2-2
+- cleanup httpd configuration
+
 * Sat Mar 21 2020 Remi Collet <remi@remirepo.net> 5.0.2-1
 - update to 5.0.2 (2020-03-21, security release)
 - use phpmyadmin/twig-i18n-extension instead of twig/extensions
