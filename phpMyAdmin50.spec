@@ -1,22 +1,18 @@
-# Fedora spec file for phpMyAdmin
+# IUS spec file for phpMyAdmin50, forked from Fedora spec file for phpMyAdmin
 #
 # License: MIT
 # http://opensource.org/licenses/MIT
 #
 # Please, preserve the changelog entries
 #
-%{!?_pkgdocdir: %global _pkgdocdir %{_datadir}/doc/%{name}-%{version}}
 # nginx 1.6 with nginx-filesystem
 %global with_nginx     1
 # httpd 2.4 with httpd-filesystem
 %global with_httpd     1
 
-%global upstream_version 5.0.2
-#global upstream_prever  rc1
-
-Name: phpMyAdmin
-Version: %{upstream_version}%{?upstream_prever:~%{upstream_prever}}
-Release: 2%{?dist}
+Name: phpMyAdmin50
+Version: 5.0.2
+Release: 3%{?dist}
 Summary: A web interface for MySQL and MariaDB
 
 # MIT (js/jquery/, js/jqplot, js/codemirror/, js/tracekit/)
@@ -24,8 +20,8 @@ Summary: A web interface for MySQL and MariaDB
 # GPLv2+ (the rest)
 License: GPLv2+ and MIT and BSD
 URL: https://www.phpmyadmin.net/
-Source0: https://files.phpmyadmin.net/%{name}/%{upstream_version}%{?upstream_prever:-%upstream_prever}/%{name}-%{upstream_version}%{?upstream_prever:-%upstream_prever}-all-languages.tar.xz
-Source1: https://files.phpmyadmin.net/%{name}/%{upstream_version}%{?upstream_prever:-%upstream_prever}/%{name}-%{upstream_version}%{?upstream_prever:-%upstream_prever}-all-languages.tar.xz.asc
+Source0: https://files.phpmyadmin.net/phpMyAdmin/%{version}/phpMyAdmin-%{version}-all-languages.tar.xz
+Source1: https://files.phpmyadmin.net/phpMyAdmin/%{version}/phpMyAdmin-%{version}-all-languages.tar.xz.asc
 Source2: phpMyAdmin.htaccess
 Source3: phpMyAdmin.nginx
 Source4: https://files.phpmyadmin.net/phpmyadmin.keyring
@@ -75,21 +71,6 @@ Requires:  php-json
 Requires:  php-mysqli
 Requires:  php-pcre
 Requires:  php-xml
-Requires:  (php-composer(google/recaptcha)             >= 1.1   with php-composer(google/recaptcha)             < 2)
-Requires:  (php-composer(phpmyadmin/motranslator)      >= 4.0   with php-composer(phpmyadmin/motranslator)      < 5)
-Requires:  (php-composer(phpmyadmin/shapefile)         >= 2.0   with php-composer(phpmyadmin/shapefile)         < 3)
-Requires:  (php-composer(phpmyadmin/sql-parser)        >= 5.0   with php-composer(phpmyadmin/sql-parser)        < 6)
-Requires:  (php-composer(phpmyadmin/twig-i18n-extension) >= 2.0 with php-composer(phpmyadmin/twig-i18n-extension) < 3)
-Requires:  (php-composer(phpseclib/phpseclib)          >= 2.0.9 with php-composer(phpseclib/phpseclib)          < 3)
-Requires:  (php-composer(symfony/config)               >= 4.2.8 with php-composer(symfony/config)               < 5)
-Requires:  (php-composer(symfony/dependency-injection) >= 4.2.8 with php-composer(symfony/dependency-injection) < 5)
-Requires:  (php-composer(symfony/expression-language)  >= 4.2.8 with php-composer(symfony/expression-language)  < 5)
-Requires:  (php-composer(symfony/polyfill-mbstring)    >= 1.8   with php-composer(symfony/polyfill-mbstring)    < 2)
-Requires:  (php-composer(symfony/yaml)                 >= 4.2.8 with php-composer(symfony/yaml)                 < 5)
-Requires:  (php-composer(twig/twig)                    >= 2.4   with php-composer(twig/twig)                    < 3)
-Requires:  (php-composer(williamdes/mariadb-mysql-kbs) >= 1.2   with php-composer(williamdes/mariadb-mysql-kbs) < 2)
-# Autoloader
-Requires:  php-composer(fedora/autoloader)
 # From composer.json, "suggest": {
 #        "ext-openssl": "Cookie encryption",
 #        "ext-curl": "Updates checking",
@@ -115,11 +96,6 @@ Requires:  php-bz2
 Requires:  php-zip
 Requires:  php-gd
 Requires:  php-mbstring
-Recommends: php-opcache
-Recommends: php-composer(tecnickcom/tcpdf)          >= 6.3
-Recommends: php-composer(pragmarx/google2fa-qrcode) >= 1.0.1
-Recommends: php-composer(samyoul/u2f-php-server)    >= 1.1
-Recommends: php-tcpdf-dejavu-sans-fonts             >= 6.2
 # From phpcompatinfo reports for 4.8.0
 #   notice: recode is optional (iconv or mbstring are preferred / used first)
 Requires:  php-date
@@ -139,9 +115,14 @@ Provides:  bundled(js-jquery) = 3.2.1
 Provides:  bundled(js-openlayers)
 Provides:  bundled(js-tracekit)
 
-Provides:  php-composer(phpmyadmin/phpmyadmin) = %{version}
 # Allow lowercase in install command
 Provides:  phpmyadmin   =  %{version}-%{release}
+Provides:  phpmyadmin50 =  %{version}-%{release}
+
+# safe replacement
+Provides:  phpMyAdmin = %{version}-%{release}
+Provides:  phpMyAdmin%{?_isa} = %{version}-%{release}
+Conflicts: phpMyAdmin < %{version}-%{release}
 
 
 %description
@@ -155,58 +136,26 @@ is available in 50 languages
 %prep
 %{?gpgverify:%{gpgverify} --keyring='%{SOURCE4}' --signature='%{SOURCE1}' --data='%{SOURCE0}'}
 
-%setup -qn phpMyAdmin-%{upstream_version}%{?upstream_prever:-%upstream_prever}-all-languages
+%setup -qn phpMyAdmin-%{version}-all-languages
 %patch0 -p1
 
 # Minimal configuration file
 sed -e "/'blowfish_secret'/s@''@'MUSTBECHANGEDONINSTALL'@"  \
-    -e "/'UploadDir'/s@''@'%{_localstatedir}/lib/%{name}/upload'@"  \
-    -e "/'SaveDir'/s@''@'%{_localstatedir}/lib/%{name}/save'@" \
+    -e "/'UploadDir'/s@''@'%{_localstatedir}/lib/phpMyAdmin/upload'@"  \
+    -e "/'SaveDir'/s@''@'%{_localstatedir}/lib/phpMyAdmin/save'@" \
     config.sample.inc.php >CONFIG
 
 # Setup vendor config file
 sed -e "/'CHANGELOG_FILE'/s@ROOT_PATH@'%{_pkgdocdir}/'@" \
     -e "/'LICENSE_FILE'/s@ROOT_PATH@'%{_pkgdocdir}/'@" \
-    -e "/'CONFIG_DIR'/s@ROOT_PATH@'%{_sysconfdir}/%{name}/'@" \
-%if 0%{?_licensedir:1}
+    -e "/'CONFIG_DIR'/s@ROOT_PATH@'%{_sysconfdir}/phpMyAdmin/'@" \
     -e '/LICENSE_FILE/s:%_defaultdocdir:%_defaultlicensedir:' \
-%endif
-    -e '/AUTOLOAD_FILE/s@./vendor@%{_datadir}/%{name}/vendor@' \
-    -e "/TEMP_DIR/s@ROOT.*tmp/'@'%{_localstatedir}/lib/%{name}/temp'@" \
+    -e '/AUTOLOAD_FILE/s@./vendor@%{_datadir}/phpMyAdmin/vendor@' \
+    -e "/TEMP_DIR/s@ROOT.*tmp/'@'%{_localstatedir}/lib/phpMyAdmin/temp'@" \
     -i libraries/vendor_config.php
 
 # For debug
 grep '^define' libraries/vendor_config.php
-
-# Generate autoloader
-rm -rf vendor/*
-cat << 'EOF' | tee vendor/autoload.php
-<?php
-/* Autoloader for phpMyAdmin and its dependencies */
-
-require_once '%{_datadir}/php/Fedora/Autoloader/autoload.php';
-\Fedora\Autoloader\Autoload::addPsr4('PhpMyAdmin\\',        dirname(__DIR__) . '/libraries/classes');
-\Fedora\Autoloader\Dependencies::required([
-    '%{_datadir}/php/PhpMyAdmin/MoTranslator/autoload.php', /* before sqlparser which may allow other version */
-    '%{_datadir}/php/PhpMyAdmin/SqlParser5/autoload.php',
-    '%{_datadir}/php/PhpMyAdmin/ShapeFile/autoload.php',
-    '%{_datadir}/php/phpseclib/autoload.php',
-    '%{_datadir}/php/ReCaptcha/autoload.php',
-    '%{_datadir}/php/Twig2/autoload.php',
-    '%{_datadir}/php/PhpMyAdmin/Twig/Extensions/autoload.php',
-    '%{_datadir}/php/Symfony4/Component/Config/autoload.php',
-    '%{_datadir}/php/Symfony4/Component/DependencyInjection/autoload.php',
-    '%{_datadir}/php/Symfony4/Component/ExpressionLanguage/autoload.php',
-    '%{_datadir}/php/Symfony4/Component/Yaml/autoload.php',
-    '%{_datadir}/php/Symfony/Polyfill/autoload.php',
-    '%{_datadir}/php/Williamdes/MariaDBMySQLKBS/autoload.php',
-]);
-\Fedora\Autoloader\Dependencies::optional([
-    '%{_datadir}/php/tcpdf/autoload.php',
-    '%{_datadir}/php/Google2FAQRCode/Google2FA/autoload.php',
-    '%{_datadir}/php/Samyoul/U2F/U2FServer/autoload.php',
-]);
-EOF
 
 
 %build
@@ -214,9 +163,9 @@ EOF
 
 
 %install
-mkdir -p %{buildroot}/%{_datadir}/%{name}
-cp -ad ./* %{buildroot}/%{_datadir}/%{name}
-install -Dpm 0640 CONFIG %{buildroot}/%{_sysconfdir}/%{name}/config.inc.php
+mkdir -p %{buildroot}/%{_datadir}/phpMyAdmin
+cp -ad ./* %{buildroot}/%{_datadir}/phpMyAdmin
+install -Dpm 0640 CONFIG %{buildroot}/%{_sysconfdir}/phpMyAdmin/config.inc.php
 # Apache
 install -Dpm 0644 %{SOURCE2} %{buildroot}/%{_sysconfdir}/httpd/conf.d/phpMyAdmin.conf
 # Nginx
@@ -224,69 +173,71 @@ install -Dpm 0644 %{SOURCE2} %{buildroot}/%{_sysconfdir}/httpd/conf.d/phpMyAdmin
 install -Dpm 0644 %{SOURCE3} %{buildroot}/%{_sysconfdir}/nginx/default.d/phpMyAdmin.conf
 %endif
 
-rm -f %{buildroot}/%{_datadir}/%{name}/config.sample.inc.php
-rm -f %{buildroot}/%{_datadir}/%{name}/*txt
-rm -f %{buildroot}/%{_datadir}/%{name}/[CDLR]*
-rm -f %{buildroot}/%{_datadir}/%{name}/libraries/.htaccess
-rm -f %{buildroot}/%{_datadir}/%{name}/setup/lib/.htaccess
-rm -f %{buildroot}/%{_datadir}/%{name}/setup/frames/.htaccess
-rm -rf %{buildroot}/%{_datadir}/%{name}/contrib
-rm     %{buildroot}/%{_datadir}/%{name}/composer.*
+rm -f %{buildroot}/%{_datadir}/phpMyAdmin/config.sample.inc.php
+rm -f %{buildroot}/%{_datadir}/phpMyAdmin/*txt
+rm -f %{buildroot}/%{_datadir}/phpMyAdmin/[CDLR]*
+rm -f %{buildroot}/%{_datadir}/phpMyAdmin/libraries/.htaccess
+rm -f %{buildroot}/%{_datadir}/phpMyAdmin/setup/lib/.htaccess
+rm -f %{buildroot}/%{_datadir}/phpMyAdmin/setup/frames/.htaccess
+rm -rf %{buildroot}/%{_datadir}/phpMyAdmin/contrib
+rm     %{buildroot}/%{_datadir}/phpMyAdmin/composer.*
 
 # JS libraries sources
-#rm -r %{buildroot}%{_datadir}/%{name}/js/jquery/src
-#rm -r %{buildroot}%{_datadir}/%{name}/js/openlayers/src
+#rm -r %{buildroot}%{_datadir}/phpMyAdmin/js/jquery/src
+#rm -r %{buildroot}%{_datadir}/phpMyAdmin/js/openlayers/src
 
 # Bundled certificates
-rm -r %{buildroot}%{_datadir}/%{name}/libraries/certs
+rm -r %{buildroot}%{_datadir}/phpMyAdmin/libraries/certs
 
 # documentation
-rm -rf    %{buildroot}%{_datadir}/%{name}/examples/
-rm -rf    %{buildroot}%{_datadir}/%{name}/doc/
-mkdir -p  %{buildroot}%{_datadir}/%{name}/doc/
-ln -s %{_pkgdocdir}/html  %{buildroot}%{_datadir}/%{name}/doc/html
+rm -rf    %{buildroot}%{_datadir}/phpMyAdmin/examples/
+rm -rf    %{buildroot}%{_datadir}/phpMyAdmin/doc/
+mkdir -p  %{buildroot}%{_datadir}/phpMyAdmin/doc/
+ln -s %{_pkgdocdir}/html  %{buildroot}%{_datadir}/phpMyAdmin/doc/html
 
-mkdir -p %{buildroot}/%{_localstatedir}/lib/%{name}/{upload,save,config,temp}
+mkdir -p %{buildroot}/%{_localstatedir}/lib/phpMyAdmin/{upload,save,config,temp}
 
-mv -f %{buildroot}%{_datadir}/%{name}/js/vendor/jquery/MIT-LICENSE.txt LICENSE-jquery
-mv -f %{buildroot}%{_datadir}/%{name}/js/vendor/codemirror/LICENSE LICENSE-codemirror
+mv -f %{buildroot}%{_datadir}/phpMyAdmin/js/vendor/jquery/MIT-LICENSE.txt LICENSE-jquery
+mv -f %{buildroot}%{_datadir}/phpMyAdmin/js/vendor/codemirror/LICENSE LICENSE-codemirror
 
 
 %pretrans
 # allow dir to link upgrade
-if  [ -d %{_datadir}/%{name}/doc/html ]; then
-  rm -rf %{_datadir}/%{name}/doc/html
+if  [ -d %{_datadir}/phpMyAdmin/doc/html ]; then
+  rm -rf %{_datadir}/phpMyAdmin/doc/html
 fi
 
 %post
 # generate a 32 chars secret key for this install
 SECRET=$(printf "%04x%04x%04x%04x%04x%04x%04x%04x" $RANDOM $RANDOM $RANDOM $RANDOM $RANDOM $RANDOM $RANDOM $RANDOM)
 sed -e "/'blowfish_secret'/s/MUSTBECHANGEDONINSTALL/$SECRET/" \
-    -i %{_sysconfdir}/%{name}/config.inc.php
+    -i %{_sysconfdir}/phpMyAdmin/config.inc.php
 
 
 %files
-%{!?_licensedir:%global license %%doc}
 %license LICENSE*
 %doc ChangeLog README CONTRIBUTING.md DCO config.sample.inc.php
 %doc doc/html/
 %doc examples/
 %doc composer.json
-%{_datadir}/%{name}
-%attr(0750,root,apache) %dir %{_sysconfdir}/%{name}
-%config(noreplace) %attr(0640,root,apache) %{_sysconfdir}/%{name}/config.inc.php
-%config(noreplace) %{_sysconfdir}/httpd/conf.d/%{name}.conf
+%{_datadir}/phpMyAdmin
+%attr(0750,root,apache) %dir %{_sysconfdir}/phpMyAdmin
+%config(noreplace) %attr(0640,root,apache) %{_sysconfdir}/phpMyAdmin/config.inc.php
+%config(noreplace) %{_sysconfdir}/httpd/conf.d/phpMyAdmin.conf
 %if %{with_nginx}
-%config(noreplace) %{_sysconfdir}/nginx/default.d/%{name}.conf
+%config(noreplace) %{_sysconfdir}/nginx/default.d/phpMyAdmin.conf
 %endif
-%dir %{_localstatedir}/lib/%{name}/
-%dir %attr(0750,apache,apache) %{_localstatedir}/lib/%{name}/upload
-%dir %attr(0750,apache,apache) %{_localstatedir}/lib/%{name}/save
-%dir %attr(0750,apache,apache) %{_localstatedir}/lib/%{name}/config
-%dir %attr(0750,apache,apache) %{_localstatedir}/lib/%{name}/temp
+%dir %{_localstatedir}/lib/phpMyAdmin/
+%dir %attr(0750,apache,apache) %{_localstatedir}/lib/phpMyAdmin/upload
+%dir %attr(0750,apache,apache) %{_localstatedir}/lib/phpMyAdmin/save
+%dir %attr(0750,apache,apache) %{_localstatedir}/lib/phpMyAdmin/config
+%dir %attr(0750,apache,apache) %{_localstatedir}/lib/phpMyAdmin/temp
 
 
 %changelog
+* Sun Apr 19 2020 Carl George <carl@george.computer> - 5.0.2-3
+- Port from Fedora to IUS
+
 * Tue Mar 24 2020 Remi Collet <remi@remirepo.net> 5.0.2-2
 - cleanup httpd configuration
 
