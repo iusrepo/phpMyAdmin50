@@ -5,10 +5,6 @@
 #
 # Please, preserve the changelog entries
 #
-# nginx 1.6 with nginx-filesystem
-%global with_nginx     1
-# httpd 2.4 with httpd-filesystem
-%global with_httpd     1
 
 Name: phpMyAdmin50
 Version: 5.0.2
@@ -32,16 +28,9 @@ Patch0:  phpMyAdmin-certs.patch
 BuildArch: noarch
 BuildRequires: gnupg2
 
+Requires(pre): shadow-utils
 Requires(post): coreutils sed
 Requires:  webserver
-%if %{with_nginx}
-Requires:  nginx-filesystem
-%endif
-%if %{with_httpd}
-Requires:  httpd-filesystem
-Requires:  php(httpd)
-Suggests:  httpd
-%endif
 # From composer.json, "require": {
 #        "php": "^7.1.3",
 #        "ext-hash": "*",
@@ -125,6 +114,29 @@ Provides:  phpMyAdmin%{?_isa} = %{version}-%{release}
 Conflicts: phpMyAdmin < %{version}-%{release}
 
 
+%package httpd
+Summary:    Apache HTTP Server configuration for phpMyAdmin
+BuildArch:  noarch
+Requires:   %{name} = %{version}-%{release}
+Requires:   httpd
+Requires:   php(httpd)
+
+
+%description httpd
+Apache HTTP Server configuration for phpMyAdmin.
+
+
+%package nginx
+Summary:    Nginx configuration for phpMyAdmin
+BuildArch:  noarch
+Requires:   %{name} = %{version}-%{release}
+Requires:   nginx
+
+
+%description nginx
+Nginx configuration for phpMyAdmin.
+
+
 %description
 phpMyAdmin is a tool written in PHP intended to handle the administration of
 MySQL over the Web. Currently it can create and drop databases,
@@ -169,9 +181,7 @@ install -Dpm 0640 CONFIG %{buildroot}/%{_sysconfdir}/phpMyAdmin/config.inc.php
 # Apache
 install -Dpm 0644 %{SOURCE2} %{buildroot}/%{_sysconfdir}/httpd/conf.d/phpMyAdmin.conf
 # Nginx
-%if %{with_nginx}
 install -Dpm 0644 %{SOURCE3} %{buildroot}/%{_sysconfdir}/nginx/default.d/phpMyAdmin.conf
-%endif
 
 rm -f %{buildroot}/%{_datadir}/phpMyAdmin/config.sample.inc.php
 rm -f %{buildroot}/%{_datadir}/phpMyAdmin/*txt
@@ -207,6 +217,21 @@ if  [ -d %{_datadir}/phpMyAdmin/doc/html ]; then
   rm -rf %{_datadir}/phpMyAdmin/doc/html
 fi
 
+
+%pre
+# add phpmyadmin group
+getent group phpmyadmin >/dev/null || groupadd -r phpmyadmin
+# add phpmyadmin user
+getent passwd phpmyadmin >/dev/null || \
+    useradd -r -g phpmyadmin -d %{_localstatedir}/lib/phpMyAdmin \
+    -s /sbin/nologin -c "phpMyAdmin" phpmyadmin
+# add apache to phpmyadmin group
+getent passwd apache >/dev/null && gpasswd -a apache phpmyadmin
+# add php-fpm to phpmyadmin group
+getent passwd php-fpm >/dev/null && gpasswd -a php-fpm phpmyadmin
+exit 0
+
+
 %post
 # generate a 32 chars secret key for this install
 SECRET=$(printf "%04x%04x%04x%04x%04x%04x%04x%04x" $RANDOM $RANDOM $RANDOM $RANDOM $RANDOM $RANDOM $RANDOM $RANDOM)
@@ -221,22 +246,27 @@ sed -e "/'blowfish_secret'/s/MUSTBECHANGEDONINSTALL/$SECRET/" \
 %doc examples/
 %doc composer.json
 %{_datadir}/phpMyAdmin
-%attr(0750,root,apache) %dir %{_sysconfdir}/phpMyAdmin
-%config(noreplace) %attr(0640,root,apache) %{_sysconfdir}/phpMyAdmin/config.inc.php
-%config(noreplace) %{_sysconfdir}/httpd/conf.d/phpMyAdmin.conf
-%if %{with_nginx}
-%config(noreplace) %{_sysconfdir}/nginx/default.d/phpMyAdmin.conf
-%endif
+%attr(0750,root,phpmyadmin) %dir %{_sysconfdir}/phpMyAdmin
+%config(noreplace) %attr(0640,root,phpmyadmin) %{_sysconfdir}/phpMyAdmin/config.inc.php
 %dir %{_localstatedir}/lib/phpMyAdmin/
-%dir %attr(0750,apache,apache) %{_localstatedir}/lib/phpMyAdmin/upload
-%dir %attr(0750,apache,apache) %{_localstatedir}/lib/phpMyAdmin/save
-%dir %attr(0750,apache,apache) %{_localstatedir}/lib/phpMyAdmin/config
-%dir %attr(0750,apache,apache) %{_localstatedir}/lib/phpMyAdmin/temp
+%dir %attr(0770,phpmyadmin,phpmyadmin) %{_localstatedir}/lib/phpMyAdmin/upload
+%dir %attr(0770,phpmyadmin,phpmyadmin) %{_localstatedir}/lib/phpMyAdmin/save
+%dir %attr(0770,phpmyadmin,phpmyadmin) %{_localstatedir}/lib/phpMyAdmin/config
+%dir %attr(0770,phpmyadmin,phpmyadmin) %{_localstatedir}/lib/phpMyAdmin/temp
+
+
+%files httpd
+%config(noreplace) %{_sysconfdir}/httpd/conf.d/phpMyAdmin.conf
+
+
+%files nginx
+%config(noreplace) %{_sysconfdir}/nginx/default.d/phpMyAdmin.conf
 
 
 %changelog
 * Sun Apr 19 2020 Carl George <carl@george.computer> - 5.0.2-3
 - Port from Fedora to IUS
+- Add httpd and nginx subpackages
 
 * Tue Mar 24 2020 Remi Collet <remi@remirepo.net> 5.0.2-2
 - cleanup httpd configuration
