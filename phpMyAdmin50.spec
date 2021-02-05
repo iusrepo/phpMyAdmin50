@@ -7,8 +7,8 @@
 #
 
 Name: phpMyAdmin50
-Version: 5.0.2
-Release: 3%{?dist}
+Version: 5.0.4
+Release: 1%{?dist}
 Summary: A web interface for MySQL and MariaDB
 
 # MIT (js/jquery/, js/jqplot, js/codemirror/, js/tracekit/)
@@ -241,7 +241,7 @@ sed -e "/'blowfish_secret'/s/MUSTBECHANGEDONINSTALL/$SECRET/" \
 
 %files
 %license LICENSE*
-%doc ChangeLog README CONTRIBUTING.md DCO config.sample.inc.php
+%doc ChangeLog README CONTRIBUTING.md config.sample.inc.php
 %doc doc/html/
 %doc examples/
 %doc composer.json
@@ -264,6 +264,9 @@ sed -e "/'blowfish_secret'/s/MUSTBECHANGEDONINSTALL/$SECRET/" \
 
 
 %changelog
+* Fri Feb 05 2021 Carl George <carl@george.computer> - 5.0.4-1
+- Latest upstream
+
 * Sun Apr 19 2020 Carl George <carl@george.computer> - 5.0.2-3
 - Port from Fedora to IUS
 - Add httpd and nginx subpackages
